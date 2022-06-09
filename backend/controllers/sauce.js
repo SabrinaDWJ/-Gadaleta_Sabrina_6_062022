@@ -2,7 +2,7 @@
 const Sauce = require("../models/Sauce");
 
 // Ajout d'une sauce
-exports.createSauce = (req, res, next) => {
+exports.createSauce = async (req, res, next) => {
     try {
         let sauce = new Sauce({
             userId: req.body.userId,
@@ -27,7 +27,7 @@ exports.createSauce = (req, res, next) => {
 }
 
 // Modification des informations d'une seule sauce
-exports.modifySauce = (req, res, next) => {
+exports.modifySauce = async (req, res, next) => {
     try {
         let sauce = new Sauce({
             _id: req.params.id,
@@ -54,7 +54,7 @@ exports.modifySauce = (req, res, next) => {
 };
 
 // Suppression d'une seule sauce 
-exports.deleteSauce = (req, res, next) => {
+exports.deleteSauce = async (req, res, next) => {
     try {
         await Sauce.deleteOne({ _id: req.params.id });
         return res.status(200).json({ message: "Sauce supprimée !" });
@@ -66,10 +66,10 @@ exports.deleteSauce = (req, res, next) => {
 }
 
 // Récupération des informations d'une seule sauce
-exports.getOneSauce = (req, res, next) => {
+exports.getOneSauce = async (req, res, next) => {
     try {
         await Sauce.findOne({ _id: req.params.id, });
-        return res.status(200).json(sauce)
+        return res.status(200).json(Sauce)
     }
     catch (err) {
         console.error(err);
@@ -79,10 +79,10 @@ exports.getOneSauce = (req, res, next) => {
 };
 
 // Récupération des informations de toutes les sauces
-exports.getAllSauce = (req, res, next) => {
+exports.getAllSauce = async (req, res, next) => {
     try {
         await Sauce.find();
-        return res.status(200).json(sauces);
+        return res.status(200).json(Sauce);
     }
     catch (err) {
         console.error(err);
