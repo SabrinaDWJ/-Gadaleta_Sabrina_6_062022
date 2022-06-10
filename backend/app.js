@@ -3,7 +3,7 @@ const app = express();
 const mongoose = require('mongoose');
 const sauceRoutes = require('./routes/sauce');
 const userRoutes = require('./routes/user');
-
+const path = require('path');
 
 mongoose.connect('mongodb+srv://Sabrina:zazzino2008@cluster0.d9xe2.mongodb.net/?retryWrites=true&w=majority',
   {
@@ -21,6 +21,8 @@ app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
   next();
 });
+
+app.use('/images', express.static(path.join(__dirname, 'images')));
 
 app.use('/api/sauces', sauceRoutes);
 app.use('/api/auth', userRoutes);

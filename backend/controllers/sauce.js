@@ -1,21 +1,25 @@
 // Création des actions pour le modèle "sauce"
 const Sauce = require("../models/Sauce");
+const fs = require('fs');
 
 // Ajout d'une sauce
-exports.createSauce = async (req, res, next) => {
+exports.createSauce = async (req, res) => {
     try {
+        const sauceObject = JSON.parse(req.body.sauce);
+        delete sauceObject._id;
         let sauce = new Sauce({
-            userId: req.body.userId,
-            name: req.body.name,
-            manufacturer: req.body.manufacturer,
-            description: req.body.description,
-            mainPepper: req.body.mainPepper,
-            imageUrl: req.body.imageUrl,
-            heat: req.body.heat,
-            likes: req.body.likes,
-            dislikes: req.body.dislikes,
-            usersLiked: req.body.usersLiked,
-            usersDisliked: req.body.usersDisliked
+            // userId: sauceObject.userId,
+            // name: sauceObject.name,
+            // manufacturer: sauceObject.manufacturer,
+            // description: sauceObject.description,
+            // mainPepper: sauceObject.mainPepper,
+            ...sauceObject,
+            imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`
+            // heat: sauceObject.heat,
+            // likes: 0,
+            // dislikes: 0,
+            // usersLiked: [],
+            // usersDisliked: []
         });
         await sauce.save();
         return res.status(201).json({ message: "Sauce enregistrée !" })
@@ -27,23 +31,24 @@ exports.createSauce = async (req, res, next) => {
 }
 
 // Modification des informations d'une seule sauce
-exports.modifySauce = async (req, res, next) => {
+exports.modifySauce = async (req, res) => {
     try {
-        let sauce = new Sauce({
+        let sauceObject = req.file ?
+            {
+                ...JSON.parse(req.body.sauce),
+                imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`
+            }
+            : { ...req.body };
+            await Sauce.updateOne({ _id: req.params.id }, {
             _id: req.params.id,
-            userId: req.body.userId,
-            name: req.body.name,
-            manufacturer: req.body.manufacturer,
-            description: req.body.description,
-            mainPepper: req.body.mainPepper,
-            imageUrl: req.body.imageUrl,
-            heat: req.body.heat,
-            likes: req.body.likes,
-            dislikes: req.body.dislikes,
-            usersLiked: req.body.usersLiked,
-            usersDisliked: req.body.usersDisliked
+            userId: sauceObject.userId,
+            name: sauceObject.name,
+            manufacturer: sauceObject.manufacturer,
+            description: sauceObject.description,
+            mainPepper: sauceObject.mainPepper,
+            imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`,
+            heat: sauceObject.heat,
         });
-        await sauce.updateOne({ _id: req.params.id }, sauce);
         return res.status(200).json({ message: "Sauce modifiée!" })
     }
     catch (err) {
@@ -56,8 +61,12 @@ exports.modifySauce = async (req, res, next) => {
 // Suppression d'une seule sauce 
 exports.deleteSauce = async (req, res, next) => {
     try {
-        await Sauce.deleteOne({ _id: req.params.id });
-        return res.status(200).json({ message: "Sauce supprimée !" });
+        let sauce = Sauce.findOne({ _id: req.params.id })
+        const filename = sauce.imageUrl.split("/images/")[1];
+        fs.unlink(`images/${filename}`, async () => {
+            await Sauce.deleteOne({ _id: req.params.id });
+            return res.status(200).json({ message: "Sauce supprimée !" });
+        });
     }
     catch (err) {
         console.error(err);
@@ -65,29 +74,29 @@ exports.deleteSauce = async (req, res, next) => {
     }
 }
 
-// Récupération des informations d'une seule sauce
-exports.getOneSauce = async (req, res, next) => {
-    try {
-        await Sauce.findOne({ _id: req.params.id, });
-        return res.status(200).json(Sauce)
-    }
-    catch (err) {
-        console.error(err);
-        return res.status(500).send("Internal error");
-    }
+    // Récupération des informations d'une seule sauce
+    exports.getOneSauce = async (req, res, next) => {
+        try {
+            await Sauce.findOne({ _id: req.params.id, });
+            return res.status(200).json(Sauce)
+        }
+        catch (err) {
+            console.error(err);
+            return res.status(500).send("Internal error");
+        }
 
-};
+    };
 
-// Récupération des informations de toutes les sauces
-exports.getAllSauce = async (req, res, next) => {
-    try {
-        await Sauce.find();
-        return res.status(200).json(Sauce);
-    }
-    catch (err) {
-        console.error(err);
-        return res.status(500).send("Internal error");
-    }
-};
+    // Récupération des informations de toutes les sauces
+    exports.getAllSauce = async (req, res, next) => {
+        try {
+            await Sauce.find();
+            return res.status(200).json(Sauce);
+        }
+        catch (err) {
+            console.error(err);
+            return res.status(500).send("Internal error");
+        }
+    };
 
 // Ajout des likes et dislikes pour chaque sauce
