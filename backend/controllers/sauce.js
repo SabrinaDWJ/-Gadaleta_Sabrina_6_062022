@@ -57,33 +57,33 @@ exports.getOneSauce = async (req, res) => {
 // Modification des informations d'une seule sauce
 exports.modifySauce = async (req, res) => {
     try {
-      let sauceObject = req.body.sauce ? JSON.parse(req.body.sauce) : req.body;
-  
-      if (req.file) {
-        let sauce = await Sauce.findOne({ _id: req.params.id });
-        fs.unlink(`images/${sauce.imageUrl.split('/images/')[1]}`, async () => {
-          sauceObject.imageUrl = `${req.protocol}://${req.get('host')}/images/${req.file.filename}`;
-          await Sauce.updateOne({ _id: req.params.id }, {
-            imageUrl: sauceObject.imageUrl
-          });
+        let sauceObject = req.body.sauce ? JSON.parse(req.body.sauce) : req.body;
+
+        if (req.file) {
+            let sauce = await Sauce.findOne({ _id: req.params.id });
+            fs.unlink(`images/${sauce.imageUrl.split('/images/')[1]}`, async () => {
+                sauceObject.imageUrl = `${req.protocol}://${req.get('host')}/images/${req.file.filename}`;
+                await Sauce.updateOne({ _id: req.params.id }, {
+                    imageUrl: sauceObject.imageUrl
+                });
+            });
+        }
+        await Sauce.updateOne({ _id: req.params.id }, {
+            userId: sauceObject.userId,
+            name: sauceObject.name,
+            manufacturer: sauceObject.manufacturer,
+            description: sauceObject.description,
+            mainPepper: sauceObject.mainPepper,
+            heat: sauceObject.heat
         });
-      }
-      await Sauce.updateOne({ _id: req.params.id }, {
-        userId: sauceObject.userId,
-        name: sauceObject.name,
-        manufacturer: sauceObject.manufacturer,
-        description: sauceObject.description,
-        mainPepper: sauceObject.mainPepper,
-        heat: sauceObject.heat
-      });
-      return res.status(200).json({ message: 'Sauce modifiée !' });
+        return res.status(200).json({ message: 'Sauce modifiée !' });
     }
     catch (error) {
-      console.error(error);
-      return res.status(500).json({ message: 'Erreur interne !' });
+        console.error(error);
+        return res.status(500).json({ message: 'Erreur interne !' });
     }
-  };
-  
+};
+
 
 // Suppression d'une seule sauce 
 exports.deleteSauce = async (req, res) => {
