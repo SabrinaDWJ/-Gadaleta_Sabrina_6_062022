@@ -58,7 +58,6 @@ exports.getOneSauce = async (req, res) => {
 exports.modifySauce = async (req, res) => {
     try {
         let sauceObject = req.body.sauce ? JSON.parse(req.body.sauce) : req.body;
-
         if (req.file) {
             let sauce = await Sauce.findOne({ _id: req.params.id });
             fs.unlink(`images/${sauce.imageUrl.split('/images/')[1]}`, async () => {
