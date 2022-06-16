@@ -110,9 +110,10 @@ exports.likeSauce = async (req, res) => {
             throw res.status(404).json({ message: 'Sauce introuvable !' });
         }
         switch (req.body.like) {
-            /* Si le client Like cette sauce */
+            // Si le client Like cette sauce 
             case 1:
                 if (!sauce.usersLiked.includes(req.body.userId)) {
+                    // mise à jour de la sauce
                     await Sauce.updateOne(
                         { _id: req.params.id },
                         {
@@ -122,9 +123,10 @@ exports.likeSauce = async (req, res) => {
                     )
                 }
                 break;
-            /* Si le client disike cette sauce */
+            // Si le client disike cette sauce 
             case -1:
                 if (!sauce.usersDisliked.includes(req.body.userId)) {
+                    // mise à jour de la sauce
                     await Sauce.updateOne(
                         { _id: req.params.id },
                         {
@@ -134,9 +136,10 @@ exports.likeSauce = async (req, res) => {
                     )
                 }
                 break;
-            /* Si le client annule son choix */
+            // Si le client annule son choix 
             case 0:
                 if (sauce.usersLiked.includes(req.body.userId)) {
+                    // mise à jour de la sauce
                     await Sauce.updateOne(
                         { _id: req.params.id },
                         {
@@ -146,6 +149,7 @@ exports.likeSauce = async (req, res) => {
                     )
                 }
                 if (sauce.usersDisliked.includes(req.body.userId)) {
+                    // mise à jour de la sauce
                     await Sauce.updateOne(
                         { _id: req.params.id },
                         {
