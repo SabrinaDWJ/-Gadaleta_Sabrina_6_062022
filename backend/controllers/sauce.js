@@ -1,7 +1,7 @@
 // Création des actions pour le modèle "sauce"
 const Sauce = require("../models/Sauce");
 // File System: Permet de créer et gérer les fichiers pour y stocker ou lire des informations 
-const fs = require('fs');
+const fs = require('fs').promises;
 
 // Ajout d'une sauce
 exports.createSauce = async (req, res) => {
@@ -46,6 +46,9 @@ exports.getAllSauce = async (req, res) => {
 exports.getOneSauce = async (req, res) => {
     try {
         let sauce = await Sauce.findOne({ _id: req.params.id });
+        if (!sauce) {
+            return res.status(404).json({ message: 'Sauce non trouvée !' });
+        }
         return res.status(200).json(sauce)
     }
     catch (err) {
@@ -57,15 +60,11 @@ exports.getOneSauce = async (req, res) => {
 // Modification des informations d'une seule sauce
 exports.modifySauce = async (req, res) => {
     try {
-        let sauceObject = req.body.sauce ? JSON.parse(req.body.sauce) : req.body;
+        let sauceObject = req.body;
         if (req.file) {
             let sauce = await Sauce.findOne({ _id: req.params.id });
-            fs.unlink(`images/${sauce.imageUrl.split('/images/')[1]}`, async () => {
-                sauceObject.imageUrl = `${req.protocol}://${req.get('host')}/images/${req.file.filename}`;
-                await Sauce.updateOne({ _id: req.params.id }, {
-                    imageUrl: sauceObject.imageUrl
-                });
-            });
+            await fs.unlink(`images/${sauce.imageUrl.split('/images/')[1]}`);
+            sauceObject.imageUrl = `${req.protocol}://${req.get('host')}/images/${req.file.filename}`;
         }
         await Sauce.updateOne({ _id: req.params.id }, {
             userId: sauceObject.userId,
@@ -83,16 +82,15 @@ exports.modifySauce = async (req, res) => {
     }
 };
 
-
 // Suppression d'une seule sauce 
 exports.deleteSauce = async (req, res) => {
     try {
         let sauce = await Sauce.findOne({ _id: req.params.id })
         const filename = sauce.imageUrl.split("/images/")[1];
-        fs.unlink(`images/${filename}`, async () => {
-            await sauce.deleteOne({ _id: req.params.id });
-            return res.status(200).json({ message: "Sauce supprimée !" });
-        });
+        await fs.unlink(`images/${filename}`)
+        await sauce.deleteOne({ _id: req.params.id });
+        return res.status(200).json({ message: "Sauce supprimée !" });
+        ;
     }
     catch (err) {
         console.error(err);
